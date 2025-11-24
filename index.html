@@ -2,53 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MM Radio Player</title>
+<title>Upanna Radio Player</title>
 
-<!-- HLS.js for .m3u8 Support -->
+<!-- HLS.js for .m3u8 -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-    body { font-family: sans-serif; background:#f2f2f2; padding:20px; }
-    .player-box { background: white; padding:20px; border-radius:10px; width:300px; }
+    body { 
+        font-family: Arial; 
+        background:#f7f7f7; 
+        padding:30px;
+        text-align:center;
+    }
+    .box {
+        background:white; 
+        padding:25px; 
+        border-radius:10px; 
+        width:330px;
+        margin:auto; 
+        box-shadow:0 0 10px #ccc;
+    }
 </style>
 </head>
+
 <body>
 
-<div class="player-box">
-    <h3>MM Radio Stream Player</h3>
-    <audio id="audio" controls autoplay></audio>
+<div class="box">
+    <h2>📻 Upanna Radio Live</h2>
+    <audio id="player" controls autoplay></audio>
 </div>
 
 <script>
-// ----------- STREAM URL ကို ဒီမှာ ပြောင်းပြင်ပါ -----------
-const stream_m3u8 = "https://mmradio.netlify.app/stream.m3u8";
-const stream_aac  = "https://mmradio.netlify.app/stream.aac";
-const stream_mp3  = "https://mmradio.netlify.app/stream.mp3";
+const streamURL = "http://www.upanna.com/stream.m3u8";
 
-// -------------------------------------------------------------
+const audio = document.getElementById("player");
 
-let audio = document.getElementById("audio");
-
-// Browser support HLS?
 if (Hls.isSupported()) {
     const hls = new Hls();
-    hls.loadSource(stream_m3u8);
+    hls.loadSource(streamURL);
     hls.attachMedia(audio);
-} else {
-    // iPhone/Safari (native .m3u8 support)
-    audio.src = stream_m3u8;
-}
-
-// Backup formats (.aac / .mp3) if .m3u8 fails
-audio.addEventListener("error", () => {
-    console.log("m3u8 failed, switching to AAC");
-    audio.src = stream_aac;
-
-    audio.addEventListener("error", () => {
-        console.log("AAC failed, switching to MP3");
-        audio.src = stream_mp3;
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        audio.play();
     });
-});
+} else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari / iPhone
+    audio.src = streamURL;
+    audio.play();
+} else {
+    alert("Your browser does not support HLS (.m3u8)");
+}
 </script>
 
 </body>
