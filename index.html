@@ -1,123 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Local 24/7 TV Channel - Auto-Play Fix</title>
-    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-    <style>
-        /* ဗီဒီယိုကို ဖန်သားပြင် အလယ်တည့်တည့်တွင် ထားရန် CSS */
-        body {
-            /* Full screen setup */
-            height: 100vh;
-            margin: 0;
-            background-color: #000;
-            
-            /* Flexbox for perfect centering */
-            display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            flex-direction: column; /* To stack h2 and video */
-            overflow: auto; /* Allow scrolling if content is too large */
-        }
+<meta charset="UTF-8">
+<title>MM Radio Player</title>
 
-        h2 {
-            color: white; /* Header text color */
-            margin-bottom: 15px;
-            /* Adjust position slightly to ensure it's not cut off */
-            padding-top: 20px; 
-        }
+<!-- HLS.js for .m3u8 Support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-        /* ဗီဒီယိုကို အကြီးဆုံးထားရန် CSS */
-        .video-js {
-            /* Use viewport units for large screen size */
-            width: 90vw !important; /* Viewport အကျယ် ၉၀% */
-            height: 50.625vw !important; /* 16:9 ratio (90 * 9 / 16) - For fixed aspect ratio */
-            max-width: 1280px !important; /* Optional: Desktop အကြီးဆုံးအရွယ်အစား */
-            max-height: 720px !important; /* Optional: Desktop အကြီးဆုံးအရွယ်အစား */
-            
-            /* Ensure the ratio is maintained on smaller screens */
-            max-height: 80vh !important;
-            max-width: 100% !important;
-        }
-
-        /* Responsive adjustment for small screens */
-        @media (max-width: 600px) {
-            h2 {
-                font-size: 1.2em;
-            }
-        }
-    </style>
+<style>
+    body { font-family: sans-serif; background:#f2f2f2; padding:20px; }
+    .player-box { background: white; padding:20px; border-radius:10px; width:300px; }
+</style>
 </head>
 <body>
-    <h2>24/7 Myanmar TV Channel</h2>
-    <video
-        id="liveVideo"
-        class="video-js vjs-default-skin"
-        /* width="640" height="360" attributes are now overridden by CSS */
-        controls
-        autoplay
-        loop
-        muted /* <<<<< FIX: ဖွင့်လိုက်တာနဲ့ တန်းပွင့်စေဖို့ ဒီ attribute ကို ထည့်လိုက်ပါပြီ။ */
-        preload="auto" /* ဗီဒီယိုကို ချက်ချင်းစတင် Load စေရန် */
-    >
-        <source src="videos/video1.mp4" type="video/mp4" />
-    </video>
 
-    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
-    <script>
-        const schedule = [
-            {filename: "videos/video1.mp4", start: "08:00", end: "12:00"},
-            {filename: "videos/video2.mp4", start: "12:00", end: "18:00"},
-            {filename: "videos/video3.mp4", start: "18:00", end: "23:59"}
-        ];
+<div class="player-box">
+    <h3>MM Radio Stream Player</h3>
+    <audio id="audio" controls autoplay></audio>
+</div>
 
-        const video = document.getElementById('liveVideo');
-        
-        // Initialize Video.js player instance
-        const player = videojs('liveVideo');
+<script>
+// ----------- STREAM URL ကို ဒီမှာ ပြောင်းပြင်ပါ -----------
+const stream_m3u8 = "https://mmradio.netlify.app/stream.m3u8";
+const stream_aac  = "https://mmradio.netlify.app/stream.aac";
+const stream_mp3  = "https://mmradio.netlify.app/stream.mp3";
 
-        // *** Auto-play Tweak ***
-        // player.ready() ကို အသုံးပြုပြီး Video.js က စနစ်တကျ ready ဖြစ်တာနဲ့ ချက်ချင်း play ခြင်း
-        player.ready(function() {
-            // Ensure muted is set before trying to play for better browser compatibility
-            this.muted(true); 
-            
-            this.play().catch(error => {
-                // Play may still be blocked in some edge cases (e.g., mobile battery saver mode)
-                console.log("Auto-play failed, video is likely muted. Please click the play button or unmute.", error);
-            });
-        });
+// -------------------------------------------------------------
 
+let audio = document.getElementById("audio");
 
-        function checkSchedule() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2,'0');
-            const minutes = now.getMinutes().toString().padStart(2,'0');
-            const current = `${hours}:${minutes}`;
+// Browser support HLS?
+if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(stream_m3u8);
+    hls.attachMedia(audio);
+} else {
+    // iPhone/Safari (native .m3u8 support)
+    audio.src = stream_m3u8;
+}
 
-            for (const item of schedule) {
-                if (current >= item.start && current < item.end) {
-                    // Check if the current video source is already set
-                    if (!player.currentSrc() || player.currentSrc().split('/').pop() !== item.filename.split('/').pop()) {
-                        
-                        // Set new source
-                        player.src({ type: 'video/mp4', src: item.filename });
-                        
-                        // Try to play the new source
-                        player.play().catch(error => {
-                            console.log("Video source changed. Auto-play was blocked. Player will resume when possible.", error);
-                        });
-                    }
-                    return; 
-                }
-            }
-        }
+// Backup formats (.aac / .mp3) if .m3u8 fails
+audio.addEventListener("error", () => {
+    console.log("m3u8 failed, switching to AAC");
+    audio.src = stream_aac;
 
-        // Start schedule check immediately
-        checkSchedule();
-        
-        // Continue checking the schedule every 10 seconds
-        setInterval(checkSchedule, 10000); 
-    </script>
+    audio.addEventListener("error", () => {
+        console.log("AAC failed, switching to MP3");
+        audio.src = stream_mp3;
+    });
+});
+</script>
+
 </body>
 </html>
