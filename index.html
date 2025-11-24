@@ -1,57 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>MM Radio Live</title>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-<style>
-    body {
-        font-family: Arial;
-        background: #ececec;
-        padding: 40px;
-        text-align: center;
-    }
-    .player-box {
-        background: white;
-        width: 350px;
-        margin: auto;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 0 12px #bbb;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>MMAudio Radio Player</title>
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+            padding-top: 40px;
+        }
+        iframe {
+            border: 0;
+            width: 100%;
+            height: 500px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="player-box">
-    <h2>📻 MM Radio Live Stream</h2>
-    <audio id="audio" controls autoplay></audio>
-</div>
+<h2>📻 Live Radio Player</h2>
 
-<script>
-// MM Radio Proxy URL (WORKING)
-const streamURL = "http://www.upanna.com/stream.m3u8";
-
-const audio = document.getElementById("audio");
-
-if (Hls.isSupported()) {
-    const hls = new Hls();
-    hls.loadSource(streamURL);
-    hls.attachMedia(audio);
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        audio.play();
-    });
-} else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
-    // iPhone / Safari
-    audio.src = streamURL;
-    audio.play();
-} else {
-    alert("Your browser does not support HLS (.m3u8)");
-}
-</script>
+<iframe src="https://mmaudio.netlify.app" allow="autoplay"></iframe>
 
 </body>
 </html>
