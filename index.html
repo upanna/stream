@@ -2,40 +2,40 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Upanna Radio Player</title>
+<title>MM Radio Live</title>
 
-<!-- HLS.js for .m3u8 -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-    body { 
-        font-family: Arial; 
-        background:#f7f7f7; 
-        padding:30px;
-        text-align:center;
+    body {
+        font-family: Arial;
+        background: #ececec;
+        padding: 40px;
+        text-align: center;
     }
-    .box {
-        background:white; 
-        padding:25px; 
-        border-radius:10px; 
-        width:330px;
-        margin:auto; 
-        box-shadow:0 0 10px #ccc;
+    .player-box {
+        background: white;
+        width: 350px;
+        margin: auto;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 12px #bbb;
     }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h2>📻 Upanna Radio Live</h2>
-    <audio id="player" controls autoplay></audio>
+<div class="player-box">
+    <h2>📻 MM Radio Live Stream</h2>
+    <audio id="audio" controls autoplay></audio>
 </div>
 
 <script>
+// MM Radio Proxy URL (WORKING)
 const streamURL = "http://www.upanna.com/stream.m3u8";
 
-const audio = document.getElementById("player");
+const audio = document.getElementById("audio");
 
 if (Hls.isSupported()) {
     const hls = new Hls();
@@ -44,8 +44,8 @@ if (Hls.isSupported()) {
     hls.on(Hls.Events.MANIFEST_PARSED, function () {
         audio.play();
     });
-} else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    // Safari / iPhone
+} else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+    // iPhone / Safari
     audio.src = streamURL;
     audio.play();
 } else {
